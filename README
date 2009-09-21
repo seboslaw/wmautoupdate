@@ -1,0 +1,31 @@
+WmAutoUpdate
+============
+WmAutoUpdate is an auto-update application framework, which can be used in .NET Compact Framework applications.
+
+Usage
+============
+Consider the example folder for a simple example of how to use the framework. The application simply consists of a form, which displays the string "old Version".
+
+	static void Main()
+    {
+      Updater updater = new Updater("http://www.myupdateurl.com/update.xml");
+      updater.CheckForNewVersion();
+
+      Application.Run(new Form1());
+    }
+	
+Upon start, the WmAutoUpdate framework kicks in and downloads the XML file "update.xml" from the update server. The update.xml file looks as follows:
+
+	<?xml version="1.0" encoding="utf-8" ?> 
+	<updates>
+		<download name="WmAutoUpdateExample">
+			<version maj="3" min="0" bld="0000"/>
+			<message>Important Update. My very important release/update note. This will be displayed within the Update Form</message>
+			<link>http://www.myupdateurl.com/update.zip</link>
+		</download>
+	</updates>
+
+Pretty self-explanatory. Afterwards, the user can choose whether to update now, or skip the update for now. If the former is chosen, the file described in the "link" tag is downloaded and unpacked into a temporary folder (Unpacking is facilitated through the http://www.codeplex.com/DotNetZip lib).
+Next, these files are moved from the temporary folder into the application folder, replacing the outdated files (the outdated files are copied into a backup folder, beforehand). If everything goes well, WmAutoUpdate creates a file called "success" within the backup folder. Lastly, the application is restarted (right now this is implemented via a call to CeRunAppAtTime; Unfortunately, the minimum time-frame this function accepts is 11 seconds. Thus, it will take 11 secs for your app to restart). Upon restart WmAutoUpdate checks for the "success" file within the backup folder. If found, the entire backup folder is deleted. If not, all files within the backup folder are copied back into the application folder (rollback).
+ 
+Both update.zip (which simply contains the same application, but with a form saying "new Version" and the Assembly Version set to 3.0.0) and update.xml can be found in the "Server Files" directory within the example folder. Both files need to be put into the according server web directory.

@@ -7,11 +7,26 @@ using System.Net;
 
 namespace WmAutoUpdate
 {
-  class TransferManager
+  public class TransferManager
   {
     public delegate void TransferProgress(int progress);
 
     private TransferProgress transferProgressDelegate;
+    private volatile bool abortTransfer = false;
+
+    public TransferManager()
+    {
+    }
+
+    public void AddObserver(Notification ev)
+    {
+      ev.AbortUpdateEvent += new Notification.AbortUpdate(Notification_AbortUpdateEvent);
+    }
+    
+    void Notification_AbortUpdateEvent()
+    {
+      this.abortTransfer = true;
+    }
 
     public bool downloadFile(String url, out Stream s, String path, TransferProgress del)
     {
@@ -38,7 +53,7 @@ namespace WmAutoUpdate
               OnProgress((int)progress);
 
               dataRead += count;
-            } while (count != 0);
+            } while (count != 0 && !abortTransfer);
           }
         }
       }
@@ -54,7 +69,6 @@ namespace WmAutoUpdate
       return true;
     }
 
-    // By Default, create an OnXXXX Method, to call the Event
     protected void OnProgress(int progress)
     {
       if (transferProgressDelegate != null)

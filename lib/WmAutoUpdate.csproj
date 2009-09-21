@@ -66,6 +66,7 @@
     <Compile Include="Notification.Designer.cs">
       <DependentUpon>Notification.cs</DependentUpon>
     </Compile>
+    <Compile Include="SystemTime.cs" />
     <Compile Include="TransferManager.cs" />
     <Compile Include="Updater.cs" />
     <Compile Include="Logger.cs" />
