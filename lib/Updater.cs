@@ -16,8 +16,10 @@ namespace WmAutoUpdate
  
   public class Updater
   {
+#if WINCE
     [DllImport("coredll")]
     protected static extern bool CeRunAppAtTime(string pwszAppName, ref SystemTime lpTime);
+#endif
 
     public delegate void UpdateDone();
     public event UpdateDone UpdateDoneEvent;
@@ -38,7 +40,7 @@ namespace WmAutoUpdate
       this.URL = url;
       Debug.Assert(url != null);
       callingAssembly = System.Reflection.Assembly.GetCallingAssembly();
-      String fullAppName = callingAssembly.GetName().CodeBase;
+      String fullAppName = GetFullAppName(callingAssembly);
       appPath = Path.GetDirectoryName(fullAppName);
       updateFilePath = Path.Combine(appPath, "wmautoupdate.xml");
       this.assertPreviousUpdate();
@@ -178,7 +180,7 @@ namespace WmAutoUpdate
     {
       string url = (string)zipFileURL;
 
-      String fullAppName = callingAssembly.GetName().CodeBase;
+      String fullAppName = GetFullAppName(callingAssembly);
       String appPath = Path.GetDirectoryName(fullAppName);
       String updateDir = appPath + "\\" + UPDATE_FOLDER_NAME;
       String updateFilename = getFilename(url);
@@ -274,11 +276,23 @@ namespace WmAutoUpdate
     }
     #endregion
 
+    public static string GetFullAppName(Assembly callingAssembly)
+    {
+      String fullAppName = callingAssembly.GetName().CodeBase;
+      if (fullAppName.StartsWith("file:\\")) fullAppName = fullAppName.Substring(6);
+      if (fullAppName.StartsWith("file:///")) fullAppName = fullAppName.Substring(8);
+      return fullAppName;
+    }
+
     private void restartApp()
     {     
-      SystemTime timeToLaunch = new SystemTime(DateTime.Now.AddSeconds(11));
-      bool res = CeRunAppAtTime(callingAssembly.GetName().CodeBase, ref timeToLaunch);
-
+      var appName = GetFullAppName(callingAssembly).Replace('/', '\\');
+#if WINCE
+      //SystemTime timeToLaunch = new SystemTime(DateTime.Now.AddSeconds(11));
+      //bool res = CeRunAppAtTime(appName, ref timeToLaunch);
+#endif
+      Logger.Instance.log("Starting: " + appName);
+      System.Diagnostics.Process.Start(appName, "restart");
       Application.Exit();
     }
 
