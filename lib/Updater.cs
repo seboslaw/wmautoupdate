@@ -101,7 +101,7 @@ namespace WmAutoUpdate
         XmlNodeList links = xDoc.GetElementsByTagName("link");
         String name = modules[0].Attributes["name"].Value;
         String link = links[0].InnerText;
-        String message = messages[0].InnerText;
+        String message = messages[0].InnerText.Replace("\n", "\r\n");
         this.zipFileURL = link;
         notification = new Notification(name, message, newVersion.ToString(), callingAssembly, this);
         notification.AbortUpdateEvent += new Notification.AbortUpdate(notification_AbortUpdateEvent);
