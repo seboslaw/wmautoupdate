@@ -210,6 +210,7 @@ namespace WmAutoUpdate
         if (Directory.Exists(backupDir))
           Directory.Delete(backupDir, true);
         Directory.CreateDirectory(backupDir);
+
         foreach (string filepath in Directory.GetFiles(updateDir))
         {
           string originalFile = appPath + "\\" + getFilenameFromPath(filepath);
@@ -217,9 +218,21 @@ namespace WmAutoUpdate
           {
             string backupFilepath = backupDir + "\\" + getFilenameFromPath(filepath);
             File.Move(originalFile, backupFilepath);
-            File.Move(filepath, originalFile);
           }
+          File.Move(filepath, originalFile);
         }
+
+        foreach (var dir in new DirectoryInfo(updateDir).GetDirectories())
+        {
+          string originalFile = appPath + "\\" + dir.Name;
+          if (Directory.Exists(originalFile))
+          {
+            string backupFilepath = backupDir + "\\" + dir.Name;
+            Directory.Move(originalFile, backupFilepath);
+          }
+          dir.MoveTo(originalFile);
+        }
+
         OnUpdateDone();
       }
     }
