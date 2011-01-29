@@ -189,7 +189,9 @@ namespace WmAutoUpdate
       tm.AddObserver(notification);
       Stream s;
 
-      tm.downloadFile(url, out s, updateZip, notification.trans);
+      if (!tm.downloadFile(url, out s, updateZip, notification.trans))
+          return;
+
       if (s != null)
         s.Close();
 
