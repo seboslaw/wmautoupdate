@@ -3,6 +3,6 @@
     <download name="WmAutoUpdateExample">
         <version maj="3" min="0" bld="0000"/>
 		<message>Important Update. My very important release/update note. This will be displayed within the Update Form</message>
-      	<link>http://192.168.1.4:8080/update.zip</link>
+      	<link>http://localhost/update.zip</link>
     </download>
 </updates>
