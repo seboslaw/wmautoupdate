@@ -8,21 +8,28 @@ using System.Reflection;
 
 namespace WmAutoUpdate
 {
-  public sealed class Logger
+  public class Logger
   {
     private static Logger instance;
     private static object syncRoot = new Object();
     private static System.IO.StreamWriter strWr;
     private static TextWriterTraceListener tr1;
 
-    private Logger()
+    protected Logger()
+    {
+      Init();
+    }
+
+    protected virtual void Init()
     {
       tr1 = new TextWriterTraceListener(System.Console.Out);
       Debug.Listeners.Add(tr1);
 
       String fullAppName = Assembly.GetExecutingAssembly().GetName().CodeBase;
       String path = Path.GetDirectoryName(fullAppName);
+      if (path.StartsWith("file:\\")) path = path.Substring(6);
       String logFile = Path.Combine(path, "update-log.txt");
+      System.Console.WriteLine(logFile);
 
       strWr = new System.IO.StreamWriter(logFile, true, System.Text.Encoding.UTF8);
       TextWriterTraceListener tr2 = new TextWriterTraceListener(strWr);
@@ -30,7 +37,6 @@ namespace WmAutoUpdate
       Debug.AutoFlush = true;
       this.log("----------------------------------------------------------------------------");
       this.log("----------------------------------------------------------------------------");
-
     }
 
     ~Logger()
@@ -55,9 +61,13 @@ namespace WmAutoUpdate
 
         return instance;
       }
+      set
+      {
+        instance = value;
+      }
     }
 
-    public void log(string message)
+    public virtual void log(string message)
     {
       lock (syncRoot)
       {
