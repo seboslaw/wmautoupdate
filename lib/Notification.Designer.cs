@@ -29,8 +29,7 @@
     /// </summary>
     private void InitializeComponent()
     {
-        this.components = new System.ComponentModel.Container();
-        this.mainMenu1 = new System.Windows.Forms.MainMenu(this.components);
+        this.mainMenu1 = new System.Windows.Forms.MainMenu();
         this.label1 = new System.Windows.Forms.Label();
         this.label2 = new System.Windows.Forms.Label();
         this.appname_label = new System.Windows.Forms.Label();
@@ -52,7 +51,6 @@
         this.label1.Location = new System.Drawing.Point(3, 0);
         this.label1.Name = "label1";
         this.label1.Size = new System.Drawing.Size(104, 19);
-        this.label1.TabIndex = 12;
         this.label1.Text = "A new version of";
         // 
         // label2
@@ -62,7 +60,6 @@
         this.label2.Location = new System.Drawing.Point(0, 0);
         this.label2.Name = "label2";
         this.label2.Size = new System.Drawing.Size(240, 29);
-        this.label2.TabIndex = 2;
         this.label2.Text = "UPDATE AVAILABLE";
         this.label2.TextAlign = System.Drawing.ContentAlignment.TopCenter;
         // 
@@ -72,7 +69,6 @@
         this.appname_label.Location = new System.Drawing.Point(113, -1);
         this.appname_label.Name = "appname_label";
         this.appname_label.Size = new System.Drawing.Size(126, 20);
-        this.appname_label.TabIndex = 14;
         this.appname_label.Text = "Application Name";
         // 
         // progressBar1
@@ -80,7 +76,6 @@
         this.progressBar1.Location = new System.Drawing.Point(0, 0);
         this.progressBar1.Name = "progressBar1";
         this.progressBar1.Size = new System.Drawing.Size(240, 33);
-        this.progressBar1.TabIndex = 7;
         this.progressBar1.Visible = false;
         // 
         // button1
@@ -98,7 +93,6 @@
         this.label5.Location = new System.Drawing.Point(3, 19);
         this.label5.Name = "label5";
         this.label5.Size = new System.Drawing.Size(56, 20);
-        this.label5.TabIndex = 16;
         this.label5.Text = "Version:";
         // 
         // version_label
@@ -106,7 +100,6 @@
         this.version_label.Location = new System.Drawing.Point(113, 19);
         this.version_label.Name = "version_label";
         this.version_label.Size = new System.Drawing.Size(123, 20);
-        this.version_label.TabIndex = 13;
         this.version_label.Text = "1.0.0.0";
         // 
         // panel1
@@ -120,7 +113,6 @@
         this.panel1.Location = new System.Drawing.Point(0, 29);
         this.panel1.Name = "panel1";
         this.panel1.Size = new System.Drawing.Size(240, 205);
-        this.panel1.TabIndex = 1;
         // 
         // message_textbox
         // 
@@ -142,12 +134,11 @@
         this.panel2.Location = new System.Drawing.Point(0, 167);
         this.panel2.Name = "panel2";
         this.panel2.Size = new System.Drawing.Size(240, 67);
-        this.panel2.TabIndex = 0;
         // 
         // button2
         // 
         this.button2.Dock = System.Windows.Forms.DockStyle.Top;
-        this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+        this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
         this.button2.Location = new System.Drawing.Point(0, 0);
         this.button2.Name = "button2";
         this.button2.Size = new System.Drawing.Size(240, 33);
@@ -180,10 +171,8 @@
         this.Name = "Notification";
         this.Text = "AutoUpdate";
         this.panel1.ResumeLayout(false);
-        this.panel1.PerformLayout();
         this.panel2.ResumeLayout(false);
         this.ResumeLayout(false);
-
     }
 
     #endregion
