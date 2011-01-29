@@ -30,6 +30,7 @@ namespace WmAutoUpdate
     public Notification(String name, String message, String version, Assembly callingAssem, Updater updater)
     {
       InitializeComponent();
+      this.DialogResult = DialogResult.No;
       this.appname_label.Text = name;
       this.version_label.Text = version;
       this.message_textbox.Text = message;

@@ -111,7 +111,7 @@ namespace WmAutoUpdate
         Logger.Instance.log("Message: " + message);
         Logger.Instance.log("Link: " + link);
 
-        if (notification.ShowDialog() == DialogResult.No)
+        if (notification.ShowDialog() != DialogResult.Yes)
         {
           notification.Dispose();
           return false;
