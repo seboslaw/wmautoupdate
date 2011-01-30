@@ -48,10 +48,11 @@
         // 
         // label1
         // 
-        this.label1.Location = new System.Drawing.Point(3, 0);
+        this.label1.Location = new System.Drawing.Point(3, -2);
         this.label1.Name = "label1";
-        this.label1.Size = new System.Drawing.Size(104, 19);
-        this.label1.Text = "A new version of";
+        this.label1.Size = new System.Drawing.Size(56, 19);
+        this.label1.Text = "Version";
+        this.label1.TextAlign = System.Drawing.ContentAlignment.TopRight;
         // 
         // label2
         // 
@@ -66,10 +67,10 @@
         // appname_label
         // 
         this.appname_label.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
-        this.appname_label.Location = new System.Drawing.Point(113, -1);
+        this.appname_label.Location = new System.Drawing.Point(139, -2);
         this.appname_label.Name = "appname_label";
-        this.appname_label.Size = new System.Drawing.Size(126, 20);
-        this.appname_label.Text = "Application Name";
+        this.appname_label.Size = new System.Drawing.Size(98, 20);
+        this.appname_label.Text = "Application";
         // 
         // progressBar1
         // 
@@ -90,16 +91,18 @@
         // 
         // label5
         // 
-        this.label5.Location = new System.Drawing.Point(3, 19);
+        this.label5.Location = new System.Drawing.Point(117, -2);
         this.label5.Name = "label5";
-        this.label5.Size = new System.Drawing.Size(56, 20);
-        this.label5.Text = "Version:";
+        this.label5.Size = new System.Drawing.Size(21, 20);
+        this.label5.Text = "of";
+        this.label5.TextAlign = System.Drawing.ContentAlignment.TopCenter;
         // 
         // version_label
         // 
-        this.version_label.Location = new System.Drawing.Point(113, 19);
+        this.version_label.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+        this.version_label.Location = new System.Drawing.Point(57, -2);
         this.version_label.Name = "version_label";
-        this.version_label.Size = new System.Drawing.Size(123, 20);
+        this.version_label.Size = new System.Drawing.Size(60, 20);
         this.version_label.Text = "1.0.0.0";
         // 
         // panel1
@@ -116,12 +119,12 @@
         // 
         // message_textbox
         // 
-        this.message_textbox.Location = new System.Drawing.Point(4, 42);
+        this.message_textbox.Location = new System.Drawing.Point(4, 20);
         this.message_textbox.Multiline = true;
         this.message_textbox.Name = "message_textbox";
         this.message_textbox.ReadOnly = true;
         this.message_textbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-        this.message_textbox.Size = new System.Drawing.Size(232, 87);
+        this.message_textbox.Size = new System.Drawing.Size(232, 109);
         this.message_textbox.TabIndex = 11;
         // 
         // panel2
@@ -166,13 +169,14 @@
         this.Controls.Add(this.panel2);
         this.Controls.Add(this.panel1);
         this.Controls.Add(this.label2);
-        this.Menu = this.mainMenu1;
+        this.Menu = null;
         this.MinimizeBox = false;
         this.Name = "Notification";
         this.Text = "AutoUpdate";
         this.panel1.ResumeLayout(false);
         this.panel2.ResumeLayout(false);
         this.ResumeLayout(false);
+
     }
 
     #endregion
