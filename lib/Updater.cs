@@ -35,6 +35,11 @@ namespace WmAutoUpdate
     private Notification notification;
     private volatile bool abortUpdate = false;
 
+    public const int RESULT_ERROR  = 0;
+    public const int RESULT_LATEST = 1;
+    public const int RESULT_UPDATED = 2;
+    public const int RESULT_CANCELLED = 3;
+
     public Updater(String url)
     {
       this.URL = url;
@@ -71,19 +76,21 @@ namespace WmAutoUpdate
       }
     }
 
-    public void CheckForNewVersion()
+    public int CheckForNewVersion()
     {
       Stream s;
       TransferManager tm = new TransferManager();
       if (tm.downloadFile(URL, out s, updateFilePath, null))
       {
         s.Close();
-        this.showUpdateDialog(s);
+        var result = this.showUpdateDialog(s);
         this.cleanup();
+        return result;
       }
+      return RESULT_ERROR;
     }
 
-    protected bool showUpdateDialog(Stream file)
+    protected int showUpdateDialog(Stream file)
     {
       Version currentVersion = callingAssembly.GetName().Version;
       XmlDocument xDoc = new XmlDocument();
@@ -91,10 +98,16 @@ namespace WmAutoUpdate
       XmlNodeList modules = xDoc.GetElementsByTagName("download");
       XmlNodeList versions = xDoc.GetElementsByTagName("version");
      
-      Version newVersion = new Version(
-        int.Parse(versions[0].Attributes["maj"].Value),
-        int.Parse(versions[0].Attributes["min"].Value),
-        int.Parse(versions[0].Attributes["bld"].Value));
+      Version newVersion;
+      if (versions[0].Attributes["id"] != null)
+      {
+          newVersion = new Version(versions[0].Attributes["id"].Value);
+      }else{
+          newVersion = new Version(
+            int.Parse(versions[0].Attributes["maj"].Value),
+            int.Parse(versions[0].Attributes["min"].Value),
+            int.Parse(versions[0].Attributes["bld"].Value));
+      }
 
       if (currentVersion.CompareTo(newVersion) < 0)
       {
@@ -116,7 +129,7 @@ namespace WmAutoUpdate
         if (notification.ShowDialog() != DialogResult.Yes)
         {
           notification.Dispose();
-          return false;
+          return RESULT_CANCELLED;
         }
         else
         {
@@ -124,11 +137,11 @@ namespace WmAutoUpdate
           string backupDir = appPath + "\\" + BACKUP_FOLDER_NAME;
           File.Create(backupDir + "\\" + "success");
           this.restartApp();
-          return true;
+          return RESULT_UPDATED;
         }
         
       }
-      return true;
+      return RESULT_LATEST;
       #region other XML parser
       //XmlReaderSettings settings = new XmlReaderSettings();
       //settings.ConformanceLevel = ConformanceLevel.Fragment;
