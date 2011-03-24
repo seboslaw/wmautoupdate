@@ -48,7 +48,11 @@ namespace WmAutoUpdate
       String fullAppName = GetFullAppName(callingAssembly);
       appPath = Path.GetDirectoryName(fullAppName);
       updateFilePath = Path.Combine(appPath, "wmautoupdate.xml");
-      this.assertPreviousUpdate();
+      try{
+          this.assertPreviousUpdate();
+      }catch(Exception e){
+          Logger.Instance.log("assertPreviousUpdate failed: " + e.Message);
+      }
     }
 
     private void assertPreviousUpdate()
@@ -80,12 +84,16 @@ namespace WmAutoUpdate
     {
       Stream s;
       TransferManager tm = new TransferManager();
-      if (tm.downloadFile(URL, out s, updateFilePath, null))
-      {
-        s.Close();
-        var result = this.showUpdateDialog(s);
-        this.cleanup();
-        return result;
+      try{
+          if (tm.downloadFile(URL, out s, updateFilePath, null))
+          {
+            s.Close();
+            var result = this.showUpdateDialog(s);
+            this.cleanup();
+            return result;
+          }
+      }catch(Exception e){
+          Logger.Instance.log("CheckForNewVersion failed: " + e.Message);
       }
       return RESULT_ERROR;
     }
