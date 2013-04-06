@@ -26,9 +26,15 @@ namespace WmAutoUpdate
       Debug.Listeners.Add(tr1);
 
       String fullAppName = Assembly.GetExecutingAssembly().GetName().CodeBase;
-      String path = Path.GetDirectoryName(fullAppName);
-      if (path.StartsWith("file:\\")) path = path.Substring(6);
-      String logFile = Path.Combine(path, "update-log.txt");
+      String uri = Path.GetDirectoryName(fullAppName);
+      if (uri.StartsWith("file:\\"))  uri = uri.Substring(6);
+      if (uri.StartsWith("file:///")) uri = uri.Substring(8);
+      if (uri.StartsWith("file:")) uri = uri.Substring(5);
+      // That could be an absolute linux path - fix it
+      if (uri[1] != ':' && uri[0] != '/' && uri[0] != '\\')
+        uri = "/"+uri;
+
+      String logFile = Path.Combine(uri, "update-log.txt");
       System.Console.WriteLine(logFile);
 
       strWr = new System.IO.StreamWriter(logFile, true, System.Text.Encoding.UTF8);

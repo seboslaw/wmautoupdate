@@ -299,10 +299,14 @@ namespace WmAutoUpdate
 
     public static string GetFullAppName(Assembly callingAssembly)
     {
-      String fullAppName = callingAssembly.GetName().CodeBase;
-      if (fullAppName.StartsWith("file:\\")) fullAppName = fullAppName.Substring(6);
-      if (fullAppName.StartsWith("file:///")) fullAppName = fullAppName.Substring(8);
-      return fullAppName;
+      String uri = callingAssembly.GetName().CodeBase;
+      if (uri.StartsWith("file:\\"))  uri = uri.Substring(6);
+      if (uri.StartsWith("file:///")) uri = uri.Substring(8);
+      if (uri.StartsWith("file:")) uri = uri.Substring(5);
+      // That could be an absolute linux path - fix it
+      if (uri[1] != ':' && uri[0] != '/' && uri[0] != '\\')
+        uri = "/"+uri;
+      return uri;
     }
 
     private void restartApp()
