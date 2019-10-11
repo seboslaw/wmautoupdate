@@ -8,21 +8,34 @@ using System.Reflection;
 
 namespace WmAutoUpdate
 {
-  public sealed class Logger
+  public class Logger
   {
     private static Logger instance;
     private static object syncRoot = new Object();
     private static System.IO.StreamWriter strWr;
     private static TextWriterTraceListener tr1;
 
-    private Logger()
+    protected Logger()
+    {
+      Init();
+    }
+
+    protected virtual void Init()
     {
       tr1 = new TextWriterTraceListener(System.Console.Out);
       Debug.Listeners.Add(tr1);
 
       String fullAppName = Assembly.GetExecutingAssembly().GetName().CodeBase;
-      String path = Path.GetDirectoryName(fullAppName);
-      String logFile = Path.Combine(path, "update-log.txt");
+      String uri = Path.GetDirectoryName(fullAppName);
+      if (uri.StartsWith("file:\\"))  uri = uri.Substring(6);
+      if (uri.StartsWith("file:///")) uri = uri.Substring(8);
+      if (uri.StartsWith("file:")) uri = uri.Substring(5);
+      // That could be an absolute linux path - fix it
+      if (uri[1] != ':' && uri[0] != '/' && uri[0] != '\\')
+        uri = "/"+uri;
+
+      String logFile = Path.Combine(uri, "update-log.txt");
+      System.Console.WriteLine(logFile);
 
       strWr = new System.IO.StreamWriter(logFile, true, System.Text.Encoding.UTF8);
       TextWriterTraceListener tr2 = new TextWriterTraceListener(strWr);
@@ -30,7 +43,6 @@ namespace WmAutoUpdate
       Debug.AutoFlush = true;
       this.log("----------------------------------------------------------------------------");
       this.log("----------------------------------------------------------------------------");
-
     }
 
     ~Logger()
@@ -55,9 +67,13 @@ namespace WmAutoUpdate
 
         return instance;
       }
+      set
+      {
+        instance = value;
+      }
     }
 
-    public void log(string message)
+    public virtual void log(string message)
     {
       lock (syncRoot)
       {

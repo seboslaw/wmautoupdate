@@ -16,8 +16,10 @@ namespace WmAutoUpdate
  
   public class Updater
   {
+#if WINCE
     [DllImport("coredll")]
     protected static extern bool CeRunAppAtTime(string pwszAppName, ref SystemTime lpTime);
+#endif
 
     public delegate void UpdateDone();
     public event UpdateDone UpdateDoneEvent;
@@ -33,15 +35,24 @@ namespace WmAutoUpdate
     private Notification notification;
     private volatile bool abortUpdate = false;
 
+    public const int RESULT_ERROR  = 0;
+    public const int RESULT_LATEST = 1;
+    public const int RESULT_UPDATED = 2;
+    public const int RESULT_CANCELLED = 3;
+
     public Updater(String url)
     {
       this.URL = url;
       Debug.Assert(url != null);
       callingAssembly = System.Reflection.Assembly.GetCallingAssembly();
-      String fullAppName = callingAssembly.GetName().CodeBase;
+      String fullAppName = GetFullAppName(callingAssembly);
       appPath = Path.GetDirectoryName(fullAppName);
       updateFilePath = Path.Combine(appPath, "wmautoupdate.xml");
-      this.assertPreviousUpdate();
+      try{
+          this.assertPreviousUpdate();
+      }catch(Exception e){
+          Logger.Instance.log("assertPreviousUpdate failed: " + e.Message);
+      }
     }
 
     private void assertPreviousUpdate()
@@ -69,19 +80,25 @@ namespace WmAutoUpdate
       }
     }
 
-    public void CheckForNewVersion()
+    public int CheckForNewVersion()
     {
       Stream s;
       TransferManager tm = new TransferManager();
-      if (tm.downloadFile(URL, out s, updateFilePath, null))
-      {
-        s.Close();
-        this.showUpdateDialog(s);
-        this.cleanup();
+      try{
+          if (tm.downloadFile(URL, out s, updateFilePath, null))
+          {
+            s.Close();
+            var result = this.showUpdateDialog(s);
+            this.cleanup();
+            return result;
+          }
+      }catch(Exception e){
+          Logger.Instance.log("CheckForNewVersion failed: " + e.Message);
       }
+      return RESULT_ERROR;
     }
 
-    protected bool showUpdateDialog(Stream file)
+    protected int showUpdateDialog(Stream file)
     {
       Version currentVersion = callingAssembly.GetName().Version;
       XmlDocument xDoc = new XmlDocument();
@@ -89,10 +106,16 @@ namespace WmAutoUpdate
       XmlNodeList modules = xDoc.GetElementsByTagName("download");
       XmlNodeList versions = xDoc.GetElementsByTagName("version");
      
-      Version newVersion = new Version(
-        int.Parse(versions[0].Attributes["maj"].Value),
-        int.Parse(versions[0].Attributes["min"].Value),
-        int.Parse(versions[0].Attributes["bld"].Value));
+      Version newVersion;
+      if (versions[0].Attributes["id"] != null)
+      {
+          newVersion = new Version(versions[0].Attributes["id"].Value);
+      }else{
+          newVersion = new Version(
+            int.Parse(versions[0].Attributes["maj"].Value),
+            int.Parse(versions[0].Attributes["min"].Value),
+            int.Parse(versions[0].Attributes["bld"].Value));
+      }
 
       if (currentVersion.CompareTo(newVersion) < 0)
       {
@@ -101,7 +124,7 @@ namespace WmAutoUpdate
         XmlNodeList links = xDoc.GetElementsByTagName("link");
         String name = modules[0].Attributes["name"].Value;
         String link = links[0].InnerText;
-        String message = messages[0].InnerText;
+        String message = messages[0].InnerText.Replace("\n", "\r\n");
         this.zipFileURL = link;
         notification = new Notification(name, message, newVersion.ToString(), callingAssembly, this);
         notification.AbortUpdateEvent += new Notification.AbortUpdate(notification_AbortUpdateEvent);
@@ -111,10 +134,10 @@ namespace WmAutoUpdate
         Logger.Instance.log("Message: " + message);
         Logger.Instance.log("Link: " + link);
 
-        if (notification.ShowDialog() == DialogResult.No)
+        if (notification.ShowDialog() != DialogResult.Yes)
         {
           notification.Dispose();
-          return false;
+          return RESULT_CANCELLED;
         }
         else
         {
@@ -122,11 +145,11 @@ namespace WmAutoUpdate
           string backupDir = appPath + "\\" + BACKUP_FOLDER_NAME;
           File.Create(backupDir + "\\" + "success");
           this.restartApp();
-          return true;
+          return RESULT_UPDATED;
         }
         
       }
-      return true;
+      return RESULT_LATEST;
       #region other XML parser
       //XmlReaderSettings settings = new XmlReaderSettings();
       //settings.ConformanceLevel = ConformanceLevel.Fragment;
@@ -178,7 +201,7 @@ namespace WmAutoUpdate
     {
       string url = (string)zipFileURL;
 
-      String fullAppName = callingAssembly.GetName().CodeBase;
+      String fullAppName = GetFullAppName(callingAssembly);
       String appPath = Path.GetDirectoryName(fullAppName);
       String updateDir = appPath + "\\" + UPDATE_FOLDER_NAME;
       String updateFilename = getFilename(url);
@@ -189,7 +212,9 @@ namespace WmAutoUpdate
       tm.AddObserver(notification);
       Stream s;
 
-      tm.downloadFile(url, out s, updateZip, notification.trans);
+      if (!tm.downloadFile(url, out s, updateZip, notification.trans))
+          return;
+
       if (s != null)
         s.Close();
 
@@ -208,6 +233,7 @@ namespace WmAutoUpdate
         if (Directory.Exists(backupDir))
           Directory.Delete(backupDir, true);
         Directory.CreateDirectory(backupDir);
+
         foreach (string filepath in Directory.GetFiles(updateDir))
         {
           string originalFile = appPath + "\\" + getFilenameFromPath(filepath);
@@ -215,9 +241,21 @@ namespace WmAutoUpdate
           {
             string backupFilepath = backupDir + "\\" + getFilenameFromPath(filepath);
             File.Move(originalFile, backupFilepath);
-            File.Move(filepath, originalFile);
           }
+          File.Move(filepath, originalFile);
         }
+
+        foreach (var dir in new DirectoryInfo(updateDir).GetDirectories())
+        {
+          string originalFile = appPath + "\\" + dir.Name;
+          if (Directory.Exists(originalFile))
+          {
+            string backupFilepath = backupDir + "\\" + dir.Name;
+            Directory.Move(originalFile, backupFilepath);
+          }
+          dir.MoveTo(originalFile);
+        }
+
         OnUpdateDone();
       }
     }
@@ -259,11 +297,27 @@ namespace WmAutoUpdate
     }
     #endregion
 
+    public static string GetFullAppName(Assembly callingAssembly)
+    {
+      String uri = callingAssembly.GetName().CodeBase;
+      if (uri.StartsWith("file:\\"))  uri = uri.Substring(6);
+      if (uri.StartsWith("file:///")) uri = uri.Substring(8);
+      if (uri.StartsWith("file:")) uri = uri.Substring(5);
+      // That could be an absolute linux path - fix it
+      if (uri[1] != ':' && uri[0] != '/' && uri[0] != '\\')
+        uri = "/"+uri;
+      return uri;
+    }
+
     private void restartApp()
     {     
-      SystemTime timeToLaunch = new SystemTime(DateTime.Now.AddSeconds(11));
-      bool res = CeRunAppAtTime(callingAssembly.GetName().CodeBase, ref timeToLaunch);
-
+      var appName = GetFullAppName(callingAssembly).Replace('/', '\\');
+#if WINCE
+      //SystemTime timeToLaunch = new SystemTime(DateTime.Now.AddSeconds(11));
+      //bool res = CeRunAppAtTime(appName, ref timeToLaunch);
+#endif
+      Logger.Instance.log("Starting: " + appName);
+      System.Diagnostics.Process.Start(appName, "restart");
       Application.Exit();
     }
 

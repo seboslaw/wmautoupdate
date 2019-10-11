@@ -1,4 +1,5 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -9,22 +10,22 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WmAutoUpdate</RootNamespace>
     <AssemblyName>WmAutoUpdate</AssemblyName>
-    <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <PlatformFamilyName>PocketPC</PlatformFamilyName>
     <PlatformID>b2c48bd2-963d-4549-9169-1fa021dce484</PlatformID>
-    <OSVersion>5.02</OSVersion>
     <DeployDirSuffix>WmAutoUpdate</DeployDirSuffix>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <NativePlatformName>Windows Mobile 6 Professional SDK</NativePlatformName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FormFactorID>
     </FormFactorID>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;$(PlatformFamilyName)</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -36,7 +37,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;$(PlatformFamilyName)</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -44,11 +45,32 @@
     <WarningLevel>4</WarningLevel>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|WINCE' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug_ce\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;WINCE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|WINCE' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release_ce\</OutputPath>
+    <DefineConstants>TRACE;WINCE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Ionic.Zip.CF, Version=1.8.4.23, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\DotNetZipLib-DevKit-v1.8\DotNetZip-v1.8-CompactFramework\Debug\Ionic.Zip.CF.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -72,18 +94,24 @@
     <Compile Include="Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup Condition=" '$(Platform)' == 'WINCE' ">
+    <Reference Include="Ionic.Zip.CF">
+      <HintPath>lib\Ionic.Zip.CF.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+    <Reference Include="Ionic.Zip.Reduced">
+      <HintPath>lib\Ionic.Zip.Reduced.dll</HintPath>
+    </Reference>
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Notification.resx">
       <DependentUpon>Notification.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="Ionic.Zip.CF.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" Condition=" '$(Platform)' == 'WINCE' " />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" Condition=" '$(Platform)' == 'AnyCPU' " />
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
@@ -94,8 +122,6 @@
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
   </Target>
   -->
 </Project>
